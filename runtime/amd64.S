@@ -33,7 +33,8 @@
 #define FUNCTION(name) \
         .globl name; \
         .align FUNCTION_ALIGN; \
-        name:
+        name: \
+CFI_STARTPROC
 
 #elif defined(SYS_mingw64) || defined(SYS_cygwin)
 
@@ -49,7 +50,8 @@
         TEXT_SECTION(name); \
         .globl name; \
         .align FUNCTION_ALIGN; \
-        name:
+        name: \
+CFI_STARTPROC
 
 #else
 
@@ -70,8 +72,8 @@
         .globl name; \
         .type name,@function; \
         .align FUNCTION_ALIGN; \
-        name:
-
+        name: \
+CFI_STARTPROC
 #endif
 
 #if defined(SYS_linux) || defined(SYS_gnu)
@@ -467,7 +469,6 @@ G(caml_system__code_begin):
         movq    Caml_state(young_ptr), %r15
 
 FUNCTION(G(caml_call_realloc_stack))
-CFI_STARTPROC
         CFI_SIGNAL_FRAME
         SAVE_ALL_REGS
         movq    8(%rsp), C_ARG_1 /* argument */
@@ -485,7 +486,6 @@ CFI_STARTPROC
 ENDFUNCTION(caml_call_realloc_stack)
 
 FUNCTION(G(caml_call_gc))
-CFI_STARTPROC
         CFI_SIGNAL_FRAME
 LBL(caml_call_gc):
         SAVE_ALL_REGS
@@ -500,7 +500,6 @@ LBL(caml_call_gc):
 ENDFUNCTION(caml_call_gc)
 
 FUNCTION(G(caml_alloc1))
-CFI_STARTPROC
         subq    $16, %r15
         cmpq    Caml_state(young_limit), %r15
         jb      LBL(caml_call_gc)
@@ -508,7 +507,6 @@ CFI_STARTPROC
 ENDFUNCTION(caml_alloc1)
 
 FUNCTION(G(caml_alloc2))
-CFI_STARTPROC
         subq    $24, %r15
         cmpq    Caml_state(young_limit), %r15
         jb      LBL(caml_call_gc)
@@ -516,7 +514,6 @@ CFI_STARTPROC
 ENDFUNCTION(caml_alloc2)
 
 FUNCTION(G(caml_alloc3))
-CFI_STARTPROC
         subq    $32, %r15
         cmpq    Caml_state(young_limit), %r15
         jb      LBL(caml_call_gc)
@@ -524,7 +521,6 @@ CFI_STARTPROC
 ENDFUNCTION(caml_alloc3)
 
 FUNCTION(G(caml_allocN))
-CFI_STARTPROC
         cmpq    Caml_state(young_limit), %r15
         jb      LBL(caml_call_gc)
         ret
@@ -535,7 +531,6 @@ ENDFUNCTION(caml_allocN)
 /******************************************************************************/
 
 FUNCTION(G(caml_c_call))
-CFI_STARTPROC
         CFI_SIGNAL_FRAME
 LBL(caml_c_call):
     /* Arguments:
@@ -556,7 +551,6 @@ LBL(caml_c_call):
 ENDFUNCTION(caml_c_call)
 
 FUNCTION(G(caml_c_call_stack_args))
-CFI_STARTPROC
         CFI_SIGNAL_FRAME
     /* Arguments:
         C arguments         : %rdi, %rsi, %rdx, %rcx, %r8, and %r9
@@ -600,7 +594,6 @@ ENDFUNCTION(caml_c_call_stack_args)
 /******************************************************************************/
 
 FUNCTION(G(caml_start_program))
-CFI_STARTPROC
         CFI_SIGNAL_FRAME
     /* Save callee-save registers */
         PUSH_CALLEE_SAVE_REGS
@@ -698,7 +691,6 @@ ENDFUNCTION(caml_start_program)
 /* Raise an exception from OCaml */
 
 FUNCTION(G(caml_raise_exn))
-CFI_STARTPROC
 LBL(caml_raise_exn):
         testq   $1, Caml_state(backtrace_active)
         jne   LBL(116)
@@ -724,7 +716,6 @@ LBL(117):
 ENDFUNCTION(caml_raise_exn)
 
 FUNCTION(G(caml_reraise_exn))
-CFI_STARTPROC
         testq   $1, Caml_state(backtrace_active)
         jne   LBL(117)
         RESTORE_EXN_HANDLER_OCAML
@@ -734,7 +725,6 @@ ENDFUNCTION(caml_reraise_exn)
 /* Raise an exception from C */
 
 FUNCTION(G(caml_raise_exception))
-CFI_STARTPROC
         movq    C_ARG_1, %r14                /* Caml_state */
         movq    C_ARG_2, %rax
     /* Load young_ptr into %r15 */
@@ -750,7 +740,6 @@ ENDFUNCTION(caml_raise_exception)
 /******************************************************************************/
 
 FUNCTION(G(caml_callback_asm))
-CFI_STARTPROC
     /* Save callee-save registers */
         PUSH_CALLEE_SAVE_REGS
     /* Initial loading of arguments */
@@ -764,7 +753,6 @@ CFI_STARTPROC
 ENDFUNCTION(caml_callback_asm)
 
 FUNCTION(G(caml_callback2_asm))
-CFI_STARTPROC
     /* Save callee-save registers */
         PUSH_CALLEE_SAVE_REGS
     /* Initial loading of arguments */
@@ -778,7 +766,6 @@ CFI_STARTPROC
 ENDFUNCTION(caml_callback2_asm)
 
 FUNCTION(G(caml_callback3_asm))
-CFI_STARTPROC
     /* Save callee-save registers */
         PUSH_CALLEE_SAVE_REGS
     /* Initial loading of arguments */
@@ -802,7 +789,6 @@ ENDFUNCTION(caml_callback3_asm)
 /******************************************************************************/
 
 FUNCTION(G(caml_perform))
-CFI_STARTPROC
     /*  %rax: effect to perform
         %rbx: freshly allocated continuation */
         movq    Caml_state(current_stack), %rsi /* %rsi := old stack */
@@ -834,7 +820,6 @@ LBL(112):
 ENDFUNCTION(caml_perform)
 
 FUNCTION(G(caml_reperform))
-CFI_STARTPROC
     /*  %rax: effect to reperform
         %rbx: continuation
         %rdi: last_fiber */
@@ -846,7 +831,6 @@ CFI_STARTPROC
 ENDFUNCTION(caml_reperform)
 
 FUNCTION(G(caml_resume))
-CFI_STARTPROC
     /* %rax -> stack, %rbx -> fun, %rdi -> arg */
         leaq    -1(%rax), %r10  /* %r10 (new stack) = Ptr_val(%rax) */
         movq    %rdi, %rax      /* %rax := argument to function in %rbx */
@@ -870,7 +854,6 @@ ENDFUNCTION(caml_resume)
 /* Run a function on a new stack,
    then invoke either the value or exception handler */
 FUNCTION(G(caml_runstack))
-CFI_STARTPROC
         CFI_SIGNAL_FRAME
     /* %rax -> stack, %rbx -> fun, %rdi -> arg */
         andq    $-2, %rax       /* %rax = Ptr_val(%rax) */
@@ -939,13 +922,11 @@ LBL(fiber_exn_handler):
 ENDFUNCTION(caml_runstack)
 
 FUNCTION(G(caml_ml_array_bound_error))
-CFI_STARTPROC
         LEA_VAR(caml_array_bound_error, %rax)
         jmp     LBL(caml_c_call)
 ENDFUNCTION(caml_ml_array_bound_error)
 
 FUNCTION(G(caml_assert_stack_invariants))
-CFI_STARTPROC
 /*      CHECK_STACK_ALIGNMENT */
         movq    Caml_state(current_stack), %r11
         movq    %rsp, %r10
